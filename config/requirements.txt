@@ -2,3 +2,6 @@ python
 pandas
 psycopg2-binary
 sqlalchemy
+json
+csv
+re
