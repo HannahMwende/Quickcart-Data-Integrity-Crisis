@@ -163,7 +163,7 @@ def main():
         writer.writerows(filtered_rows)
 
 
-    # Calculate statistics for removed payments without order_id(orphaned payments)
+    # Calculate statistics for removed payments without corresponding order_id(orphaned payments)
     removed_count = len(removed_no_order_id)
     removed_total_amount = sum(row.get("amount_usd") or 0 for row in removed_no_order_id)
 
