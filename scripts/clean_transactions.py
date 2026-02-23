@@ -82,10 +82,13 @@ def is_valid_record(row):
     """
     Rules for determining whether a record is acceptable:
         - payment_id must exist
+        - order_id must exist
         - amount must be valid
         - currency must exist
     """
     if not row.get("payment_id"):
+        return False
+    if not row.get("order_id"):
         return False
     if row.get("amount_usd") is None:
         return False
@@ -101,6 +104,7 @@ def is_valid_record(row):
 
 def main():
     clean_rows = []
+    removed_no_order_id = []
 
     with open(INPUT_FILE, "r", encoding="utf-8") as f:
         for line_number, line in enumerate(f, start=1):
@@ -124,6 +128,10 @@ def main():
 
             # Normalize amount
             row["amount_usd"] = normalize_amount(row["raw_amount"])
+
+            # Track payments without corresponding order_id(orphan payments)
+            if not row.get("order_id"):
+                removed_no_order_id.append(row)
 
             # Validate record
             if not is_valid_record(row):
@@ -155,9 +163,16 @@ def main():
         writer.writerows(filtered_rows)
 
 
+    # Calculate statistics for removed payments without order_id(orphaned payments)
+    removed_count = len(removed_no_order_id)
+    removed_total_amount = sum(row.get("amount_usd") or 0 for row in removed_no_order_id)
+
     print(f"Completed extraction and cleaning")
     print(f"Clean rows: {len(clean_rows)}")
-    print(f"Output: {OUTPUT_FILE}")
+    print(f"\n--- Orphaned Payments (No Order ID) ---")
+    print(f"Number of transactions: {removed_count}")
+    print(f"Total amount of orphaned payments: ${removed_total_amount:.2f}")
+    print(f"\nOutput: {OUTPUT_FILE}")
 
 
 if __name__ == "__main__":

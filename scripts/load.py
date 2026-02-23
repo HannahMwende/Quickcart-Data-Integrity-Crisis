@@ -42,3 +42,22 @@ if __name__ == "__main__":
     seed_file_path = "seed.sql"
 
     load_seed_file(db_config, seed_file_path)
+import psycopg2
+
+conn = psycopg2.connect(
+    host="localhost",
+    database="your_database_name",
+    user="postgres",
+    password="your_password"
+)
+
+with open("sql/schema.sql", "r") as f:
+    sql_script = f.read()
+
+cur = conn.cursor()
+cur.execute(sql_script)
+conn.commit()
+cur.close()
+conn.close()
+
+print("Schema created successfully!")
